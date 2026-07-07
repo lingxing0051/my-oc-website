@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>虚妄编年史 · 世界观设定</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- 移动端菜单按钮 -->
+    <button class="menu-toggle" id="menuToggle" aria-label="打开菜单">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- 侧边遮罩 -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- 左侧导航 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">虚妄编年史</h1>
+        <p class="logo-sub">Chronicles of Xu Wang</p>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-section="timeline">
+          <span class="nav-icon">⏳</span>
+          <span>世界线时间轴</span>
+        </button>
+        <button class="nav-item" data-section="worldmap">
+          <span class="nav-icon">🌍</span>
+          <span>世界地图</span>
+        </button>
+        <button class="nav-item" data-section="geography">
+          <span class="nav-icon">🗺️</span>
+          <span>地理志</span>
+        </button>
+        <button class="nav-item" data-section="factions">
+          <span class="nav-icon">⚔️</span>
+          <span>势力分布</span>
+        </button>
+        <button class="nav-item" data-section="characters">
+          <span class="nav-icon">👤</span>
+          <span>人物图鉴</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="settings-btn" id="settingsBtn" title="API 设置">⚙️ API 设置</button>
+      </div>
+    </aside>
+
+    <!-- 右侧内容区 -->
+    <main class="main">
+      <!-- 世界线时间轴 -->
+      <section class="content-section active" id="section-timeline">
+        <header class="section-header">
+          <h2>世界线时间轴</h2>
+          <p class="section-desc">从创世初期经神祀纪年至葬鸦纪年的完整历史脉络</p>
+        </header>
+        <div class="timeline" id="timelineContainer"></div>
+      </section>
+
+      <!-- 世界地图 -->
+      <section class="content-section" id="section-worldmap">
+        <header class="section-header">
+          <h2>世界地图</h2>
+          <p class="section-desc">虚妄之境全图 · 点击区域查看势力详情</p>
+        </header>
+        <div class="world-map-wrap" id="worldMapContainer"></div>
+      </section>
+
+      <!-- 地理志 -->
+      <section class="content-section" id="section-geography">
+        <header class="section-header">
+          <h2>地理志</h2>
+          <p class="section-desc">央陆灵树、灵脉与各国疆域</p>
+        </header>
+        <div class="geo-grid" id="geographyContainer"></div>
+      </section>
+
+      <!-- 势力分布 -->
+      <section class="content-section" id="section-factions">
+        <header class="section-header">
+          <h2>势力分布</h2>
+          <p class="section-desc">仙、魔、中立三方势力的格局与详情</p>
+        </header>
+        <div class="faction-tabs" id="factionTabs"></div>
+        <div class="faction-content" id="factionContainer"></div>
+      </section>
+
+      <!-- 人物图鉴 -->
+      <section class="content-section" id="section-characters">
+        <header class="section-header section-header-row">
+          <div>
+            <h2>人物图鉴</h2>
+            <p class="section-desc">虚妄世界中已登场的重要角色</p>
+          </div>
+          <button class="btn btn-primary" id="createGroupChatBtn">创建群聊</button>
+        </header>
+        <div class="char-grid" id="characterGrid"></div>
+
+        <!-- 人物详情面板 -->
+        <div class="char-detail" id="charDetail" hidden>
+          <button class="detail-close" id="detailClose" aria-label="关闭">×</button>
+          <div class="detail-header" id="detailHeader"></div>
+          <div class="detail-body" id="detailBody"></div>
+          <div class="detail-actions">
+            <button class="btn btn-primary" id="aiChatBtn">AI 对话</button>
+          </div>
+          <!-- AI 聊天界面 -->
+          <div class="chat-panel" id="chatPanel" hidden>
+            <div class="chat-header">
+              <span id="chatHeaderLabel">与 <strong id="chatCharName"></strong> 对话</span>
+              <div class="chat-header-actions">
+                <button class="btn btn-ghost btn-sm" id="exitScenarioBtn" hidden>退出情景</button>
+                <button class="btn btn-ghost btn-sm" id="clearChatBtn">清除记录</button>
+              </div>
+            </div>
+            <div class="chat-messages" id="chatMessages"></div>
+
+            <div class="scenario-context" id="scenarioContext" hidden>
+              <div class="scenario-context-main">
+                <div class="scenario-context-title" id="scenarioTitle"></div>
+                <div class="scenario-context-meta">
+                  <span id="scenarioLocation"></span>
+                  <span class="scenario-meta-sep">·</span>
+                  <span id="scenarioMood"></span>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm" id="endScenarioBtn">结束事件</button>
+            </div>
+
+            <div class="chat-mode-switch">
+              <label class="chat-mode-label">对话长度</label>
+              <button id="shortModeBtn" class="mode-btn active" type="button">短对话</button>
+              <button id="longModeBtn" class="mode-btn" type="button">长对话</button>
+            </div>
+
+            <div class="chat-input-area">
+              <textarea id="chatInput" placeholder="输入消息…" rows="2"></textarea>
+              <button class="btn btn-primary" id="sendChatBtn">发送</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- API 设置弹窗 -->
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal-backdrop" id="settingsBackdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>DeepSeek API 设置</h3>
+        <button class="modal-close" id="settingsClose">×</button>
+      </div>
+      <div class="modal-body">
+        <label for="apiKeyInput">API Key</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off">
+        <p class="hint">密钥仅保存在浏览器 localStorage 中，不会上传至任何服务器。</p>
+        <label for="apiModelInput">模型</label>
+        <input type="text" id="apiModelInput" value="deepseek-chat">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="settingsCancel">取消</button>
+        <button class="btn btn-primary" id="settingsSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 群聊弹窗 -->
+  <div class="modal group-chat-modal" id="groupChatModal" hidden>
+    <div class="modal-backdrop" id="groupChatBackdrop"></div>
+    <div class="modal-content group-chat-content">
+      <!-- 设置面板 -->
+      <div id="groupChatSetup">
+        <div class="modal-header">
+          <h3>创建群聊</h3>
+          <button class="modal-close" id="groupChatClose" aria-label="关闭">×</button>
+        </div>
+        <div class="modal-body group-setup-body">
+          <fieldset class="group-fieldset">
+            <legend>选择参与角色（至少 2 人）</legend>
+            <div class="group-char-list" id="groupCharCheckboxes"></div>
+          </fieldset>
+
+          <label for="groupTime">时间</label>
+          <input type="text" id="groupTime" placeholder="例：葬鸦 1300 年 · 秋">
+
+          <label for="groupLocation">地点</label>
+          <input type="text" id="groupLocation" placeholder="例：云海学院 · 玄武殿">
+
+          <label for="groupBackground">故事背景</label>
+          <textarea id="groupBackground" rows="3" placeholder="描述本次群聊的情境与起因…"></textarea>
+
+          <label for="groupRoleType">你的扮演身份</label>
+          <select id="groupRoleType">
+            <option value="existing">已有角色</option>
+            <option value="custom">自拟角色</option>
+          </select>
+
+          <div id="groupExistingRole">
+            <label for="groupExistingChar">选择角色</label>
+            <select id="groupExistingChar"></select>
+          </div>
+
+          <div id="groupCustomRole" hidden>
+            <label for="customName">姓名</label>
+            <input type="text" id="customName" placeholder="角色姓名">
+            <label for="customGender">性别</label>
+            <input type="text" id="customGender" placeholder="男 / 女 / 其他">
+            <label for="customIdentity">身份</label>
+            <input type="text" id="customIdentity" placeholder="例：云海学院外门弟子">
+            <label for="customRelations">与其他角色关系</label>
+            <input type="text" id="customRelations" placeholder="例：萧翼的同窗">
+            <label for="customOther">其他</label>
+            <textarea id="customOther" rows="2" placeholder="性格、外貌等补充…"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="groupChatCancel">取消</button>
+          <button class="btn btn-primary" id="startGroupChatBtn">开始群聊</button>
+        </div>
+      </div>
+
+      <!-- 群聊对话窗口 -->
+      <div id="groupChatWindow" hidden>
+        <div class="modal-header group-chat-header">
+          <div>
+            <h3 id="groupChatTitle">群聊</h3>
+            <p class="group-chat-meta" id="groupChatMeta"></p>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="leaveGroupChatBtn">离开群聊</button>
+        </div>
+        <div class="group-chat-messages" id="groupChatMessages"></div>
+        <div class="chat-input-area">
+          <textarea id="groupChatInput" placeholder="以你的角色身份发言…" rows="2"></textarea>
+          <button class="btn btn-primary" id="sendGroupChatBtn">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
