@@ -22,12 +22,45 @@ const DeepSeekAPI = {
   SCENARIO_CHAT_PREFIX: "xuwang_scenario_chat_",
   SCENARIO_SUMMARY_PREFIX: "xuwang_scenario_summary_",
 
-  getChatEndpoint() {
-    const host = window.location.hostname;
-    if (host.endsWith("github.io")) {
-      return `${SITE_CONFIG.VERCEL_ORIGIN}/api/chat`;
+  isGithubPages() {
+    return window.location.hostname.endsWith("github.io");
+  },
+
+  getChatEndpoints() {
+    if (this.isGithubPages()) {
+      return [`${SITE_CONFIG.VERCEL_ORIGIN}/api/chat`];
     }
-    return "/api/chat";
+    return ["/api/chat"];
+  },
+
+  getChatEndpoint() {
+    return this.getChatEndpoints()[0];
+  },
+
+  /** 检测 AI 接口是否可达（GET /api/chat） */
+  async testConnection() {
+    const url = this.getChatEndpoint();
+    try {
+      const response = await fetch(url, { method: "GET" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        return { ok: false, message: data.error || `接口异常 (${response.status})` };
+      }
+      return { ok: true, message: "AI 接口连接正常" };
+    } catch {
+      if (this.isGithubPages()) {
+        return {
+          ok: false,
+          message:
+            "连不上 AI 后台（国内网络常无法访问 Vercel）。\n" +
+            "请在自己电脑双击「启动网站.bat」，并在 API 设置填入 DeepSeek 密钥。"
+        };
+      }
+      return {
+        ok: false,
+        message: "连不上 AI 接口。本地请运行 node dev-server.cjs 后访问 http://localhost:3000"
+      };
+    }
   },
 
   getApiKey() {
@@ -114,6 +147,14 @@ const DeepSeekAPI = {
    * @param {{ maxTokens?: number, temperature?: number }} options
    */
   async callDeepSeek(messages, options = {}) {
+    if (this.isGithubPages() && !this.getApiKey()) {
+      throw new Error(
+        "在 GitHub 网址聊天需要先填 API Key。\n" +
+        "点左下角「API 设置」，粘贴 DeepSeek 密钥（sk- 开头）并保存。\n" +
+        "若填了仍不行，请在自己电脑双击「启动网站.bat」玩。"
+      );
+    }
+
     const maxTokens = options.maxTokens ?? 1500;
     const temperature = options.temperature ?? 0.85;
 
@@ -128,20 +169,30 @@ const DeepSeekAPI = {
     if (apiKey) body.apiKey = apiKey;
 
     let response;
-    try {
-      response = await fetch(this.getChatEndpoint(), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-      });
-    } catch (err) {
+    let lastError = null;
+
+    for (const endpoint of this.getChatEndpoints()) {
+      try {
+        response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+        break;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+
+    if (!response) {
       throw new Error(
-        "无法连接 API 服务（Failed to fetch）。请确认：\n" +
-        "1. 若本地测试，请运行 node dev-server.cjs 后访问 http://localhost:3000\n" +
-        "2. 若线上使用，请部署到 Vercel 并确保 api/chat.js 已上传\n" +
-        "3. 不要用 Live Server 或直接双击打开 HTML 文件"
+        this.isGithubPages()
+          ? "无法连接 AI 后台（国内网络可能访问不了 Vercel）。\n" +
+            "解决办法：在自己电脑双击「启动网站.bat」，\n" +
+            "在 API 设置填入 DeepSeek 密钥，用 http://localhost:3000 玩。"
+          : "无法连接 API 服务。请运行 node dev-server.cjs 后访问 http://localhost:3000"
       );
     }
 
@@ -149,17 +200,10 @@ const DeepSeekAPI = {
       const err = await response.json().catch(() => ({}));
       const message = typeof err.error === "string" ? err.error : err.error?.message;
       if (response.status === 405) {
-        const onGithubPages = window.location.hostname.endsWith("github.io");
         throw new Error(
           message ||
-          (onGithubPages
-            ? "API 请求失败 (405)：GitHub Pages 不能运行 AI 接口。\n" +
-              "请让家人按「GitHub用户必看.txt」在 Vercel 部署一次，\n" +
-              "并设置 DEEPSEEK_API_KEY，然后用 Vercel 网址访问。"
-            : "API 请求失败 (405)：当前环境不支持 POST。\n" +
-              "请勿使用 Live Server / 直接打开 HTML。\n" +
-              "本地请运行: node dev-server.cjs，然后访问 http://localhost:3000\n" +
-              "线上请部署到 Vercel 并确保 api/chat/index.js 已上传")
+          "API 请求失败 (405)。GitHub 网址不能自己运行 AI，\n" +
+          "请在自己电脑双击「启动网站.bat」，或等网络能连上 Vercel。"
         );
       }
       throw new Error(message || `API 请求失败 (${response.status})`);

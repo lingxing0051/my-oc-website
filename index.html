@@ -53,6 +53,7 @@
 
     <!-- 右侧内容区 -->
     <main class="main">
+      <div class="site-notice" id="siteNotice" hidden></div>
       <!-- 世界线时间轴 -->
       <section class="content-section active" id="section-timeline">
         <header class="section-header">
@@ -159,7 +160,9 @@
       <div class="modal-body">
         <label for="apiKeyInput">API Key</label>
         <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off">
-        <p class="hint">个人密钥可选，仅存本机浏览器。留空则使用服务器 DEEPSEEK_API_KEY。本地测试请运行 node dev-server.cjs。</p>
+        <p class="hint">GitHub 网址需先填 API Key。若仍无法聊天，请在自己电脑双击「启动网站.bat」。</p>
+        <button class="btn btn-ghost btn-sm" id="testApiBtn" type="button">测试 AI 连接</button>
+        <p class="hint" id="apiTestResult"></p>
         <label for="apiModelInput">模型</label>
         <input type="text" id="apiModelInput" value="deepseek-chat">
       </div>

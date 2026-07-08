@@ -3,5 +3,6 @@
     "api/**/*.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "regions": ["hkg1", "sin1", "icn1"]
 }

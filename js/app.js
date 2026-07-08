@@ -40,6 +40,7 @@ window.chatMode = 'short'; // 默认短对话
 
   /* ── 初始化 ── */
   function init() {
+    showSiteNotice();
     renderTimeline();
     renderWorldMap();
     renderGeography();
@@ -1227,6 +1228,19 @@ ${userRoleDesc}
     }
   }
 
+  function showSiteNotice() {
+    const notice = $("#siteNotice");
+    if (!notice) return;
+
+    if (DeepSeekAPI.isGithubPages()) {
+      notice.hidden = false;
+      notice.innerHTML =
+        "⚠️ 你正在用 GitHub 网址。在线聊天需要连接 Vercel 后台，国内网络可能连不上。" +
+        "若无法聊天，请在自己电脑双击文件夹里的「<strong>启动网站.bat</strong>」，" +
+        "并在左下角 API 设置填入 DeepSeek 密钥。";
+    }
+  }
+
   /* ── API 设置弹窗 ── */
   function bindSettings() {
     const modal = $("#settingsModal");
@@ -1234,6 +1248,7 @@ ${userRoleDesc}
     $("#settingsBtn").addEventListener("click", () => {
       $("#apiKeyInput").value = DeepSeekAPI.getApiKey();
       $("#apiModelInput").value = DeepSeekAPI.getModel();
+      $("#apiTestResult").textContent = "";
       modal.hidden = false;
     });
 
@@ -1245,6 +1260,15 @@ ${userRoleDesc}
       DeepSeekAPI.setApiKey($("#apiKeyInput").value.trim());
       DeepSeekAPI.setModel($("#apiModelInput").value.trim() || "deepseek-chat");
       modal.hidden = true;
+    });
+
+    $("#testApiBtn")?.addEventListener("click", async () => {
+      const resultEl = $("#apiTestResult");
+      if (!resultEl) return;
+      resultEl.textContent = "正在测试连接…";
+      const result = await DeepSeekAPI.testConnection();
+      resultEl.textContent = result.message;
+      resultEl.style.color = result.ok ? "var(--gold)" : "#e07070";
     });
   }
 
