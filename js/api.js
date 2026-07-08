@@ -1,6 +1,7 @@
 /**
  * DeepSeek API 封装
- * API Key 存储在 localStorage，键名：xuwang_api_key / xuwang_api_model
+ * 经 /api/chat 服务端代理调用，避免浏览器 CORS 限制
+ * 可选：个人 API Key 存 localStorage（键名 xuwang_api_key），仅本机保存
  */
 
 // ★ 全局对话模式变量（短/长对话），由 UI 按钮修改
@@ -98,17 +99,49 @@ const DeepSeekAPI = {
    * @param {{ maxTokens?: number, temperature?: number }} options
    */
   async callDeepSeek(messages, options = {}) {
-    const response = await fetch(this.ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ messages })
-    });
+    const maxTokens = options.maxTokens ?? 1500;
+    const temperature = options.temperature ?? 0.85;
+
+    const body = {
+      messages,
+      model: this.getModel(),
+      max_tokens: maxTokens,
+      temperature
+    };
+
+    const apiKey = this.getApiKey();
+    if (apiKey) body.apiKey = apiKey;
+
+    let response;
+    try {
+      response = await fetch(this.ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+    } catch (err) {
+      throw new Error(
+        "无法连接 API 服务（Failed to fetch）。请确认：\n" +
+        "1. 若本地测试，请运行 node dev-server.cjs 后访问 http://localhost:3000\n" +
+        "2. 若线上使用，请部署到 Vercel 并确保 api/chat.js 已上传\n" +
+        "3. 不要用 Live Server 或直接双击打开 HTML 文件"
+      );
+    }
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       const message = typeof err.error === "string" ? err.error : err.error?.message;
+      if (response.status === 405) {
+        throw new Error(
+          message ||
+          "API 请求失败 (405)：当前环境不支持 POST。\n" +
+          "请勿使用 Live Server / 直接打开 HTML。\n" +
+          "本地请运行: node dev-server.cjs，然后访问 http://localhost:3000\n" +
+          "线上请部署到 Vercel 并确保 api/chat/index.js 已上传"
+        );
+      }
       throw new Error(message || `API 请求失败 (${response.status})`);
     }
 
@@ -170,7 +203,7 @@ ${transcript || "（对话较短，请根据情景信息合理续写）"}
 };
 
 /**
- * 角色自定义头像存储（localStorage，Base64 图片）
+ * 角色自定义头像存储（localStorage，仅本机浏览器可见）
  */
 const AvatarStore = {
   PREFIX: "xuwang_avatar_",

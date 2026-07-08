@@ -334,7 +334,7 @@ window.chatMode = 'short'; // 默认短对话
           </label>
           <button class="btn btn-ghost btn-sm" id="avatarResetBtn" type="button"${AvatarStore.hasCustomAvatar(ch.id) ? "" : " hidden"}>恢复默认</button>
         </div>
-        <p class="avatar-upload-hint">支持 PNG / JPG / GIF / WebP，最大 5MB</p>
+        <p class="avatar-upload-hint">支持 PNG / JPG / GIF / WebP，最大 5MB。仅保存在本机浏览器，其他设备不可见。</p>
       </div>
       <div class="detail-info">
         <h3>${ch.name}</h3>
@@ -1023,11 +1023,6 @@ ${userRoleDesc}
   function startGroupChat() {
     const form = validateGroupChatForm();
     if (!form) return;
-
-    if (!DeepSeekAPI.getApiKey()) {
-      alert("请先在「API 设置」中填入 DeepSeek API Key");
-      return;
-    }
 
     groupChatState = {
       active: true,

@@ -159,7 +159,7 @@
       <div class="modal-body">
         <label for="apiKeyInput">API Key</label>
         <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off">
-        <p class="hint">密钥仅保存在浏览器 localStorage 中，不会上传至任何服务器。</p>
+        <p class="hint">个人密钥可选，仅存本机浏览器。留空则使用服务器 DEEPSEEK_API_KEY。本地测试请运行 node dev-server.cjs。</p>
         <label for="apiModelInput">模型</label>
         <input type="text" id="apiModelInput" value="deepseek-chat">
       </div>
