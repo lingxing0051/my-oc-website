@@ -7,13 +7,28 @@
 // ★ 全局对话模式变量（短/长对话），由 UI 按钮修改
 var chatMode = 'short';   // 使用 var 确保挂载到 window，方便跨文件访问
 
+/**
+ * GitHub Pages 只能展示网页，不能运行 API。
+ * 在 Vercel 部署同一仓库后，把下面的地址改成你的 Vercel 网址（不要末尾斜杠）。
+ */
+const SITE_CONFIG = {
+  VERCEL_ORIGIN: "https://my-oc-website.vercel.app"
+};
+
 const DeepSeekAPI = {
   STORAGE_KEY: "xuwang_api_key",
   MODEL_KEY: "xuwang_api_model",
   CHAT_PREFIX: "xuwang_chat_",
   SCENARIO_CHAT_PREFIX: "xuwang_scenario_chat_",
   SCENARIO_SUMMARY_PREFIX: "xuwang_scenario_summary_",
-  ENDPOINT: "/api/chat",
+
+  getChatEndpoint() {
+    const host = window.location.hostname;
+    if (host.endsWith("github.io")) {
+      return `${SITE_CONFIG.VERCEL_ORIGIN}/api/chat`;
+    }
+    return "/api/chat";
+  },
 
   getApiKey() {
     return localStorage.getItem(this.STORAGE_KEY) || "";
@@ -114,7 +129,7 @@ const DeepSeekAPI = {
 
     let response;
     try {
-      response = await fetch(this.ENDPOINT, {
+      response = await fetch(this.getChatEndpoint(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -134,12 +149,17 @@ const DeepSeekAPI = {
       const err = await response.json().catch(() => ({}));
       const message = typeof err.error === "string" ? err.error : err.error?.message;
       if (response.status === 405) {
+        const onGithubPages = window.location.hostname.endsWith("github.io");
         throw new Error(
           message ||
-          "API 请求失败 (405)：当前环境不支持 POST。\n" +
-          "请勿使用 Live Server / 直接打开 HTML。\n" +
-          "本地请运行: node dev-server.cjs，然后访问 http://localhost:3000\n" +
-          "线上请部署到 Vercel 并确保 api/chat/index.js 已上传"
+          (onGithubPages
+            ? "API 请求失败 (405)：GitHub Pages 不能运行 AI 接口。\n" +
+              "请让家人按「GitHub用户必看.txt」在 Vercel 部署一次，\n" +
+              "并设置 DEEPSEEK_API_KEY，然后用 Vercel 网址访问。"
+            : "API 请求失败 (405)：当前环境不支持 POST。\n" +
+              "请勿使用 Live Server / 直接打开 HTML。\n" +
+              "本地请运行: node dev-server.cjs，然后访问 http://localhost:3000\n" +
+              "线上请部署到 Vercel 并确保 api/chat/index.js 已上传")
         );
       }
       throw new Error(message || `API 请求失败 (${response.status})`);

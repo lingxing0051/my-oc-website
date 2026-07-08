@@ -1,0 +1,49 @@
+GitHub 用户必看 · 为什么 AI 聊不了天？
+
+═══════════════════════════════════════
+  原因（一句话）
+═══════════════════════════════════════
+
+  你的网址是：lingxing0051.github.io/...
+  这是 GitHub Pages，只能「展示网页」，不能「运行 AI 后台」。
+  所以聊天会报 405 错误。
+
+  解决办法：同一个项目，再在 Vercel 部署一次（免费）。
+
+═══════════════════════════════════════
+  家人操作步骤（约 10 分钟，只需做一次）
+═══════════════════════════════════════
+
+  第 1 步：打开 https://vercel.com
+          用 GitHub 账号登录（和上传代码的是同一个）
+
+  第 2 步：点 「Add New...」→ 「Project」
+
+  第 3 步：找到 my-oc-website 这个项目，点 「Import」
+
+  第 4 步：不用改设置，直接点 「Deploy」
+          等 1～2 分钟
+
+  第 5 步：部署完成后，记下 Vercel 给的网址，例如：
+          https://my-oc-website.vercel.app
+
+  第 6 步：点项目 → Settings → Environment Variables
+          添加：
+            名称：DEEPSEEK_API_KEY
+            值：sk- 开头的 DeepSeek 密钥
+          保存后，到 Deployments 点 Redeploy
+
+  第 7 步（可选）：如果 Vercel 网址不是 my-oc-website.vercel.app
+          打开 js/api.js，修改最上面 SITE_CONFIG 里的地址
+
+═══════════════════════════════════════
+  以后用哪个网址？
+═══════════════════════════════════════
+
+  推荐发给朋友：https://my-oc-website.vercel.app
+  （Vercel 网址，AI 聊天一定能用）
+
+  GitHub 网址 lingxing0051.github.io/... 也能打开网站，
+  部署 Vercel 并填好密钥后，也会自动去 Vercel 调用 AI。
+
+═══════════════════════════════════════
